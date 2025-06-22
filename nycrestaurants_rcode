@@ -1,0 +1,249 @@
+
+#final project code
+library(readr)
+library(readxl)
+nyctop20 <- read_csv("nyc_top20.csv")
+head(nyctop20)
+View(nyctop20)
+
+# table of the 20 most frequent chains
+top20_chains <- nyc %>%
+  count(DBA, sort = TRUE) %>%
+  top_n(20, n)
+
+nyc_top20 <- nyc %>%
+  filter(DBA %in% top20_chains$DBA)
+
+nyc_top20 <- nyc_top20 %>%
+  group_by(DBA) %>%
+  mutate(n_restaurants = n()) %>%
+  ungroup()
+
+#boxplot
+library(ggplot2)
+library(dplyr)
+library(readr)
+
+restaurant_clean %>%
+  filter(Category %in% c("Chain", "Non-Chain"),       
+         !is.na(SCORE),                              
+         SCORE >= 0, SCORE <= 100) %>%               
+  ggplot(aes(x = Category, y = SCORE)) +
+  geom_boxplot(fill = "skyblue", color = "gray40") +
+  stat_summary(fun = mean, geom = "point", shape = 20, size = 3, color = "red") + # moyenne en rouge
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.border = element_rect(color = "gray50", fill = NA, linewidth = 0.5),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = "gray80"),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(
+    x = "Restaurant Type",
+    y = "Inspection Score",
+    title = "Comparison of Inspection Scores: Chain vs Non-Chain Restaurants"
+  )
+
+#table comparing chain and non chain restaurant
+
+library(dplyr)
+
+restaurant_summary <- restaurant_clean %>%
+  filter(Category %in% c("Chain", "Non-Chain")) %>%      # keep only relevant rows
+  filter(!is.na(SCORE), SCORE >= 0, SCORE <= 100) %>%    # filter valid scores
+  group_by(Category) %>%
+  summarise(
+    count = n(),
+    mean = round(mean(SCORE), 1),
+    median = median(SCORE),
+    sd = round(sd(SCORE), 1),
+    min = min(SCORE),
+    max = max(SCORE),
+    sum_critical = sum(CRITICAL.FLAG == "Critical", na.rm = TRUE),
+    percent_critical = round(100 * mean(CRITICAL.FLAG == "Critical", na.rm = TRUE), 1)
+  )
+
+print(restaurant_summary)
+write.csv(restaurant_summary, "restaurant_summary.csv", row.names = FALSE)
+
+nyc <- read_excel("newyorkrestaurantsdata.xlsx")
+restaurant <- nyc
+ library(dplyr)
+str(restaurant)
+head(restaurant)
+# Classify into chain and non-chain based on how many unique addresses a DBA has
+restaurant_chain_info <- restaurant %>%
+  distinct(CAMIS, DBA,  BUILDING, STREET, ZIPCODE) %>%
+  group_by(DBA) %>%
+  summarise(location_count = n()) %>%
+    mutate(Category = ifelse(location_count > 1, "Chain", "Non-Chain"))
+ 
+restaurant_cleaned <- restaurant %>%
+     left_join(restaurant_chain_info, by = "DBA", )
+ 
+head(restaurant_cleaned %>% select(DBA, BORO, Category))
+DBA
+1                   BILL'S NEW YORK CITY
+2                                TGA NYC
+3                                 DUNKIN
+4                                 DUNKIN
+5 EL ENCANTO CENTRO-AMERICANO RESTAURANT
+6                     TAQUERIA EL PUENTE
+       BORO  Category
+1 Manhattan Non-Chain
+2 Manhattan Non-Chain
+3     Bronx     Chain
+4     Bronx     Chain
+5    Queens Non-Chain
+6  Brooklyn Non-Chain
+> View(restaurant_cleaned)
+
+> setwd("C:/Users/Utilisateur/Desktop/nyc")
+> nyc <- read.csv("nyc.csv")
+> library(dplyr)
+
+ # Calculate the 20 most frequent chains
+top20_chains <- nyc %>%
+  filter(!is.na(DBA)) %>%     # Remove NAs before counting
+  count(DBA, sort = TRUE) %>%
+  top_n(20, n)
+  
+ 
+View(nyc_top20)
+
+# Keep only the lines with the 20 largest chains  
+nyc_top20 <- nyc %>%
+  filter(DBA %in% top20_chains$DBA)
+  
+
+# Adds to each restaurant the total number of restaurants in its chain
+nyc_top20 <- nyc_top20 %>%
+  group_by(DBA) %>%
+  mutate(n_restaurants = n()) %>%
+  ungroup()
+  
+View(nyc_top20)
+getwd()
+
+write.csv(nyc_top20, "/Users/petranepozitkova/test/nyc_top20.csv")
+library(ggplot2)
+
+ggplot(nyc_top20, aes(x = DBA, y = SCORE, fill = DBA)) +
+geom_boxplot() +
+theme(axis.text.x = element_text(angle = 45, hjust = 1),
+panel.border = element_rect(color = "gray50", fill = NA, size = 0.5),
+panel.background = element_rect(fill = "white"), 
+panel.grid.major = element_line(color = "gray80"), 
+panel.grid.minor = element_blank(),)+
+guides(fill = "none")+
+labs(
+    x = "Chain Name",
+    y = "Inspection Score",  # New y-axis label
+    title = "NYC Top 20 Chain Restaurants by Inspection Score"
+  )
+  
+ggplot(data = nyc_top20, aes(x = DBA, y = sum(`CRITICAL FLAG`)) +
+  geom_bar(stat = "identity") +
+theme(axis.text.x = element_text(angle = 45, hjust = 1),
+panel.border = element_rect(color = "gray50", fill = NA, size = 0.5),
+panel.background = element_rect(fill = "white"), 
+panel.grid.major = element_line(color = "gray80"), 
+panel.grid.minor = element_blank(),)+
+guides(fill = "none")+
+labs(
+    x = "Chain Name",
+    y = "Inspection Score",  # New y-axis label
+    title = "NYC Top 20 Chain Restaurants by Inspection Score"
+  )
+  
+sapply(nyc_top20, class)
+  
+library(dplyr)
+
+
+
+summary_data <- nyc_top20 %>%
+  group_by(DBA) %>%
+  summarise(sumcritical = sum(`CRITICAL FLAG`, na.rm = TRUE))
+  
+ggplot(summary_data, aes(x = DBA, y = sumcritical, fill = DBA)) +
+  geom_bar(stat = "identity", color="black") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.border = element_rect(color = "gray50", fill = NA, size = 0.7),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = "gray80"),
+    panel.grid.minor = element_blank()) +
+    labs( title = "Number of Critical Flags by Restaurant",
+    x = "Restaurant",
+    y = "Total Critical Flags" ) +
+  guides(fill = "none")
+  
+  
+  top20_table <- nyc_top20 %>%
+  group_by(DBA) %>%
+  summarise(
+    count = n(),
+    mean = mean(SCORE, na.rm = TRUE),
+    median = median(SCORE, na.rm = TRUE),
+    sd = sd(SCORE, na.rm = TRUE),
+    min = min(SCORE, na.rm = TRUE),
+    max = max(SCORE, na.rm = TRUE)
+  ) %>%
+  arrange(desc(count))
+
+print(top20_table)
+
+summary_data <- nyc_top20 %>%
+  group_by(DBA) %>%
+  summarise(
+    sumcritical = sum(`CRITICAL FLAG`, na.rm = TRUE),
+    total_inspections = n()
+  ) %>%
+  mutate(
+    percent_critical = (sumcritical / total_inspections) * 100
+  ) %>%
+  arrange(desc(sumcritical))
+print(summary_data)
+
+top20allresults <- top20_table %>%
+  inner_join(summary_data %>% select(DBA, sumcritical, percent_critical),  by = "DBA")
+View(top20allresults)
+
+
+View(restaurant_cleaned)
+nrow(top20_chains)
+
+restaurant_cleaned %>% ggplot(aes(x = SCORE, fill = Category)) + geom_histogram(bins = 150) +
+ scale_fill_manual(values = c("Chain" = "#f8766d", "Non-Chain" = "#00bdd4"))+
+ theme(panel.border = element_rect(color = "gray50", fill = NA, size = 0.7),
+    panel.background = element_rect(fill = "white"),
+    panel.grid.major = element_line(color = "gray80"),
+    panel.grid.minor = element_blank()) +
+    labs( title = "Distribution of Score in Chain and Non-Chain restaurant",
+    x = "Score",
+    y = "Count")
+
+> nyc <- nyc %>%
++     mutate(
++         INSPECTION DATE = as.Date(`INSPECTION DATE`, format = "%m/%d/%Y"),
++         YEAR = year(`INSPECTION DATE`)
++     )
+> 
+> nyc_filtered <- nyc %>%
++     filter(!YEAR %in% c(1900, 2009, 2013, 2014))
+> 
+> ggplot(nyc_filtered, aes(x = factor(YEAR), y = SCORE, fill = factor(YEAR))) +
++     geom_boxplot() +
++     theme(
++         axis.text.x = element_text(angle = 45, hjust = 1),
++         panel.border = element_rect(color = "gray50", fill = NA, size = 0.5),
++         panel.background = element_rect(fill = "white"),
++         panel.grid.major = element_line(color = "gray80"),
++         panel.grid.minor = element_blank()
++     ) +
++     guides(fill = "none") +
++     labs(
++         x = "Year",
++         y = "Inspection Score",
++         title = "NYC Restaurant Inspection Scores by Year"
++     )
