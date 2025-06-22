@@ -14,7 +14,7 @@ The data about restaurant inspection results were downloaded from Kaggle, the or
 
 ## File Structure
 
-There are three main parts - ici project template, read me and code compiled from all memebers of the team.  The link to the data used in our project can be found in the readme.
+There are two main parts - ici project templatre with read me and code compiled from all memebers of the team.  The link to the data used in our project can be found in the readme.
 
 ## Analysis
 
